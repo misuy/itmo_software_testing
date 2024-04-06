@@ -176,7 +176,9 @@ class BTreeNode {
                 child.deleteKey(key, tree);
         }
 
-        
+        if (this.isLeaf)
+            return;
+
         if (child.getN() < (tree.t - 1))
         {
             boolean flag = false;
@@ -279,6 +281,21 @@ class BTreeNode {
     }
 
 
+    public void collectKeys(List<Integer> list) {
+        if (this.isLeaf) {
+            for (int idx = 0; idx < this.n; idx++)
+                list.add(this.keys.get(idx));
+            return;
+        }
+
+        for (int idx = 0; idx < (this.n + 1); idx++) {
+            this.children.get(idx).collectKeys(list);
+            if (idx < this.n)
+                list.add(this.keys.get(idx));
+        }
+    }
+
+
     public String toString(int offset) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < offset; i++)
@@ -315,8 +332,26 @@ public class BTree {
         this.root.insertKey(key, this);
     }
 
+    public void insert(List<Integer> keys) {
+        keys.forEach((key) -> this.insert(key));
+    }
+
     public void delete(Integer key) {
         this.root.deleteKey(key, this);
+    }
+
+    public void delete(List<Integer> keys) {
+        keys.forEach((key) -> this.delete(key));
+    }
+
+    public void clear() {
+        this.root = new BTreeNode(0, true, null);
+    }
+
+    public List<Integer> toList() {
+        List<Integer> list = new ArrayList<>();
+        this.root.collectKeys(list);
+        return list;
     }
 
     @Override
